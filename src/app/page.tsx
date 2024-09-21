@@ -1,76 +1,69 @@
-"use client"
+"use client";
 
-import { useState, FormEvent } from 'react';
-import Image from 'next/image'; 
+import { useState, FormEvent } from "react";
+import Image from "next/image";
+import { useAuth } from "./contexts/AuthContext";
+import { useRouter } from "next/navigation";
+
 const Login = () => {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [error, setError] = useState<string>('');
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
+
+  const { login } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch('http://localhost:8000/api/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      await login(username, password);
 
-      if (!response.ok) {
-        throw new Error('Login falhou');
-      }
-
-      const data = await response.json();
- 
-      console.log('Login bem-sucedido:', data);
+      router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message);
+      setError("Falha no login. Verifique suas credenciais.");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        {/* Adicionando a imagem */}
-        <div className="flex justify-center mb-6">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 shadow-md rounded-lg w-96">
+        <figure className="flex justify-center mb-6">
           <Image
-            src="/assets/images/enpon-logo.png" 
-            alt="Epon Logo"
-            width={200} 
-            height={100} 
-            className="object-contain" 
+            src="/assets/images/empon-logo.png"
+            alt="Logo"
+            width={200}
+            height={100}
           />
-        </div>
+        </figure>
+
         <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Email:</label>
+            <label className="block mb-1">username:</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2"
+              className="w-full px-3 py-2 border rounded-md"
             />
           </div>
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700">Senha:</label>
+          <div className="mb-4">
+            <label className="block mb-1">Senha:</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2"
+              className="w-full px-3 py-2 border rounded-md"
             />
           </div>
-          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+          {error && <p className="text-red-500">{error}</p>}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200"
+            className="w-full bg-blue-500 text-white py-2 rounded-md mt-4"
           >
             Entrar
           </button>
