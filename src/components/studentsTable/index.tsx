@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { IStudentData, useStudents } from '@/contexts/StudentsContext';
 import CertificateModal from '../certificateModal';
+import { toast } from 'react-toastify';
 
 export interface IStudentTable {
   id: string;
@@ -24,20 +25,25 @@ const StudentTable = () => {
 
   useEffect(() => {
     const getStudents = async () => {
-      const studentsData = await fetchStudents();
-      if (studentsData) {
-        const studentsFormatted = studentsData.map((student: IStudentData) => ({
-          id: student.id,
-          name: student.full_name,
-          trimester: student.graduation_term,
-          hasCertificate: student.highlight_certificate_generated,
-          hasDiploma: student.diploma_generated,
-        }));
-        setStudents(studentsFormatted);
+      try {
+        const studentsData = await fetchStudents();
+        if (studentsData) {
+          const studentsFormatted = studentsData.map((student: IStudentData) => ({
+            id: student.id,
+            name: student.full_name,
+            trimester: student.graduation_term,
+            hasCertificate: student.highlight_certificate_generated,
+            hasDiploma: student.diploma_generated,
+          }));
+          setStudents(studentsFormatted);
+        }
+      } catch (error) {
+        toast.error('Erro ao carregar os dados dos alunos.');
+        console.error(error);
       }
     };
     getStudents();
-  }, []);
+  }, [fetchStudents]);
 
   const handleGenerateCertificate = (
     student: IStudentTable,

@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { useStudents } from '@/contexts/StudentsContext';
+import { toast } from 'react-toastify';
 
 // Definindo o schema de validação com Yup
 const validationSchema = Yup.object().shape({
@@ -39,13 +40,13 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
     try {
       const pdfBlob = await generateCertificate(studentId, certificateType, director, viceDirector, year);
       downloadPdf(pdfBlob); 
-      alert('Certificado gerado e baixado com sucesso!');
+      toast.success('Certificado gerado com sucesso!'); 
       onClose();
     } catch (error) {
-      console.error('Erro ao gerar ou baixar certificado:', error);
-      alert('Erro ao gerar ou baixar certificado, tente novamente.');
+      toast.error('Erro ao gerar ou baixar certificado, tente novamente.'); 
     }
   };
+  
   const downloadPdf = (response: Blob) => {
     const url = window.URL.createObjectURL(response);
     const link = document.createElement('a');
