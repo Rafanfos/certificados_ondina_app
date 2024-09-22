@@ -1,5 +1,6 @@
 import { useStudents } from '@/contexts/StudentsContext';
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 const UploadCSV = () => {
   const { uploadCSV } = useStudents();
@@ -23,17 +24,16 @@ const UploadCSV = () => {
 
   const handleUpload = async () => {
     if (!file) {
-      alert('Por favor, selecione um arquivo CSV.');
+      toast.error('Por favor, selecione um arquivo CSV.'); // Toast de erro
       return;
     }
 
     try {
       await uploadCSV(file);
-      alert('Arquivo CSV enviado com sucesso!');
+      toast.success('Arquivo CSV enviado com sucesso!'); // Toast de sucesso
       setFile(null);
     } catch (error) {
-      console.error('Erro ao enviar arquivo CSV:', error);
-      alert('Erro ao enviar arquivo CSV, tente novamente.');
+      toast.error('Erro ao enviar arquivo CSV, tente novamente.'); // Toast de erro
     }
   };
 
