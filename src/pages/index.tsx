@@ -4,20 +4,29 @@ import { useState, FormEvent } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const LoginPage = () => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [error, setError] = useState<string>('');
 
   const { login } = useAuth();
-
+  const router = useRouter();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
 
-    await login(username, password);
+    try {
+      const token = await login(username, password);
+      
+      localStorage.setItem('token', token);
+
+      toast.success('Login realizado com sucesso!');
+      router.push('/dashboard'); 
+    } catch (err) {
+      toast.error('Erro ao realizar login.');
+    }
   };
 
   return (
@@ -54,8 +63,7 @@ const LoginPage = () => {
               className='w-full px-3 py-2 border rounded-md'
             />
           </div>
-          {error && <p className='text-red-500'>{error}</p>}
-          <button
+                  <button
             type='submit'
             className='w-full bg-blue-500 text-white py-2 rounded-md mt-4'
           >
