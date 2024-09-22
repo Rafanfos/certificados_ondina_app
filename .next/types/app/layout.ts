@@ -1,4 +1,4 @@
-// File: C:\Users\rafae\OneDrive\Documentos\Projetos\certificados_ondina\certificados_ondina_app\src\app\layout.tsx
+// File: /home/rafael/Documentos/certificados ondina/certificados_ondina_app/src/app/layout.tsx
 import * as entry from '../../../src/app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
