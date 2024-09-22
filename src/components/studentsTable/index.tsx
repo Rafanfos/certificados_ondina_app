@@ -123,7 +123,7 @@ const StudentTable = () => {
         <CertificateModal
           isOpen={isModalOpen}
           onClose={closeModal}
-          studentId={selectedStudent.id}
+          student={selectedStudent}
           certificateType={certificateType}
         />
       )}
