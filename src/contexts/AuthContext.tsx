@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import {
   createContext,
@@ -6,8 +6,10 @@ import {
   useContext,
   ReactNode,
   useEffect,
-} from "react";
-import axios from "axios";
+} from 'react';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+import { useRouter } from 'next/navigation';
 
 type AuthContextData = {
   user: User | null;
@@ -29,38 +31,52 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
-  const [contextUrl, setContextUrl] = useState<string>("");
+  const [userId, setUserId] = useState<string>('');
+  const [contextUrl, setContextUrl] = useState<string>('');
+
+  const router = useRouter();
 
   useEffect(() => {
-    const baseUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
+    const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
     setContextUrl(`${baseUrl}/users`);
   });
 
   const login = async (username: string, password: string) => {
     try {
-      const response = await axios.post(`${contextUrl}login`, {
+      const response = await axios.post(`${contextUrl}/login`, {
         username,
         password,
       });
       const userData = response.data;
 
-      localStorage.setItem("token", userData.token); // Salva o token no localStorage
+      const token = userData.access;
+      router.push('/dashboard');
+      if (token) {
+        localStorage.setItem('token', userData.access);
+      }
     } catch (error) {
-      console.error("Login failed", error);
+      console.error('Login failed', error);
     }
   };
 
   const fetchUserData = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:8000/api/users/me", {
+      const token = localStorage.getItem('token');
+
+      if (token) {
+        const decoded: any = jwtDecode(token);
+        setUserId(decoded.id);
+      }
+
+      const response = await axios.get(`${contextUrl}/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+
       setUser(response.data);
     } catch (error) {
-      console.error("Failed to fetch user data", error);
+      console.error('Failed to fetch user data', error);
     }
   };
 
