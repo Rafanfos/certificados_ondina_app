@@ -1,19 +1,24 @@
-"use client"
+'use client';
 
-import { createContext, useState, useContext, ReactNode } from "react";
-import axios from "axios";
+import { createContext, useContext, ReactNode } from 'react';
+import axios from 'axios';
 
-type Student = {
-  name: string;
-  trimester: string;
-  hasCertificate: boolean;
-  hasDiploma: boolean;
-};
+export interface IStudentData {
+  id: string;
+  full_name: string;
+  graduation_term: string;
+  diploma_generated: boolean;
+  highlight_certificate_generated: boolean;
+}
 
 type StudentsContextData = {
-  students: Student[];
-  fetchStudents: () => Promise<void>;
-  generateCertificate: (studentId: string) => Promise<void>;
+  fetchStudents: () => Promise<IStudentData[]>;
+  generateCertificate: (
+    studentId: string,
+    certificateType: string,
+    director: string,
+    viceDirector: string
+  ) => Promise<void>;
 };
 
 type StudentsProviderProps = {
@@ -25,44 +30,60 @@ const StudentsContext = createContext<StudentsContextData>(
 );
 
 export const StudentsProvider = ({ children }: StudentsProviderProps) => {
-  const [students, setStudents] = useState<Student[]>([]);
+  const fetchStudents = async (): Promise<IStudentData[]> => {
+    const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+    const contextUrl = `${baseUrl}/students`;
+    const token = localStorage.getItem('token');
 
-  const fetchStudents = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:8000/api/students", {
+      const response = await axios.get(`${contextUrl}/list/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      setStudents(response.data);
+
+      return response.data.students;
     } catch (error) {
-      console.error("Failed to fetch students", error);
+      console.error(error);
+      throw new Error('Falha ao listar alunos');
     }
   };
 
-  const generateCertificate = async (studentId: string) => {
+  const generateCertificate = async (
+    studentId: string,
+    certificateType: string,
+    director: string,
+    viceDirector: string
+  ) => {
+    const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+    const contextUrl = `${baseUrl}/students`;
+    const token = localStorage.getItem('token');
+
+    const body = {
+      certificate_type: certificateType,
+      student_id: studentId,
+      director: director,
+      vice_director: viceDirector,
+    };
+
     try {
-      const token = localStorage.getItem("token");
       await axios.post(
-        `http://localhost:8000/api/students/${studentId}/certificate`,
-        {},
+        `${contextUrl}${studentId}/certificate`,
+        { body },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      alert("Certificado gerado com sucesso!");
+      alert('Certificado gerado com sucesso!');
     } catch (error) {
-      console.error("Failed to generate certificate", error);
+      console.error('Failed to generate certificate', error);
     }
   };
 
   return (
-    <StudentsContext.Provider
-      value={{ students, fetchStudents, generateCertificate }}
-    >
+    <StudentsContext.Provider value={{ fetchStudents, generateCertificate }}>
       {children}
     </StudentsContext.Provider>
   );

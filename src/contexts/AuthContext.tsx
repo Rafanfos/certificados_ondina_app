@@ -32,12 +32,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const router = useRouter();
 
-  useEffect(() => {
-    const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
-    setContextUrl(`${baseUrl}/users`);
-  });
-
   const login = async (username: string, password: string) => {
+    const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+    const contextUrl = `${baseUrl}/users`;
+
     try {
       const response = await axios.post(`${contextUrl}/login`, {
         username,
@@ -56,6 +54,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const fetchUserData = async (): Promise<IUserData> => {
+    const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+    const contextUrl = `${baseUrl}/users`;
+
     try {
       const token = localStorage.getItem('token');
 
