@@ -34,10 +34,10 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
   });
 
   const onSubmit = async (data: any) => {
-    const { director, viceDirector } = data; // Isolando os dados
+    const { director, viceDirector, year } = data; // Isolando os dados
   
     try {
-      const pdfBlob = await generateCertificate(studentId, certificateType, director, viceDirector);
+      const pdfBlob = await generateCertificate(studentId, certificateType, director, viceDirector, year);
       downloadPdf(pdfBlob); 
       alert('Certificado gerado e baixado com sucesso!');
       onClose();

@@ -17,7 +17,8 @@ type StudentsContextData = {
     studentId: string,
     certificateType: string,
     director: string,
-    viceDirector: string
+    viceDirector: string,
+    year: string
   ) => Promise<Blob>;
 };
 
@@ -53,7 +54,8 @@ export const StudentsProvider = ({ children }: StudentsProviderProps) => {
     studentId: string,
     certificateType: string,
     director: string,
-    viceDirector: string
+    viceDirector: string,
+    year: string
   ): Promise<Blob> => {
     const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
     const contextUrl = `${baseUrl}/students`;
@@ -64,6 +66,7 @@ export const StudentsProvider = ({ children }: StudentsProviderProps) => {
       student_id: studentId,
       director: director,
       vice_director: viceDirector,
+      year
     };
 
     try {
