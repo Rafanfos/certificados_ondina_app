@@ -67,7 +67,7 @@ export const StudentsProvider = ({ children }: StudentsProviderProps) => {
       student_id: studentId,
       director: director,
       vice_director: viceDirector,
-      year
+      year,
     };
 
     try {
@@ -75,13 +75,12 @@ export const StudentsProvider = ({ children }: StudentsProviderProps) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        responseType: 'blob', 
+        responseType: 'blob',
       });
 
       return response.data;
-      } catch (error) {
-      console.error('Failed to generate certificate', error);
-      throw error;
+    } catch (error) {
+      throw new Error('Falha ao gerar certificado');
     }
   };
 
@@ -89,10 +88,10 @@ export const StudentsProvider = ({ children }: StudentsProviderProps) => {
     const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
     const contextUrl = `${baseUrl}/students`;
     const token = localStorage.getItem('token');
-  
+
     const formData = new FormData();
     formData.append('file', file);
-  
+
     try {
       await axios.post(`${contextUrl}/register/`, formData, {
         headers: {
@@ -101,14 +100,14 @@ export const StudentsProvider = ({ children }: StudentsProviderProps) => {
         },
       });
     } catch (error) {
-      console.error('Failed to upload CSV', error);
       throw new Error('Falha ao enviar arquivo CSV');
     }
   };
-  
 
   return (
-    <StudentsContext.Provider value={{ fetchStudents, generateCertificate, uploadCSV }}>
+    <StudentsContext.Provider
+      value={{ fetchStudents, generateCertificate, uploadCSV }}
+    >
       {children}
     </StudentsContext.Provider>
   );

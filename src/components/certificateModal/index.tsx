@@ -2,6 +2,8 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { useStudents } from '@/contexts/StudentsContext';
+import { toast } from 'react-toastify';
+import { IStudentTable } from '../studentsTable';
 
 // Definindo o schema de validação com Yup
 const validationSchema = Yup.object().shape({
@@ -13,14 +15,14 @@ const validationSchema = Yup.object().shape({
 interface CertificateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  studentId: string;
+  student: IStudentTable;
   certificateType: string;
 }
 
 const CertificateModal: React.FC<CertificateModalProps> = ({
   isOpen,
   onClose,
-  studentId,
+  student,
   certificateType,
 }) => {
   const { generateCertificate } = useStudents();
@@ -34,23 +36,24 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
   });
 
   const onSubmit = async (data: any) => {
-    const { director, viceDirector, year } = data; // Isolando os dados
+    const { director, viceDirector, year } = data; 
   
     try {
-      const pdfBlob = await generateCertificate(studentId, certificateType, director, viceDirector, year);
+      const pdfBlob = await generateCertificate(student.id, certificateType, director, viceDirector, year);
       downloadPdf(pdfBlob); 
-      alert('Certificado gerado e baixado com sucesso!');
+      toast.success('Certificado gerado com sucesso!'); 
       onClose();
     } catch (error) {
-      console.error('Erro ao gerar ou baixar certificado:', error);
-      alert('Erro ao gerar ou baixar certificado, tente novamente.');
+      toast.error('Erro ao gerar ou baixar certificado, tente novamente.'); 
     }
   };
+  
   const downloadPdf = (response: Blob) => {
     const url = window.URL.createObjectURL(response);
     const link = document.createElement('a');
+    const generatedDate = new Date().toISOString();
     link.href = url;
-    link.setAttribute('download', 'certificado.pdf'); 
+    link.setAttribute('download', `${student.name}_${certificateType}_${generatedDate}pdf`); 
     document.body.appendChild(link);
     link.click(); 
     link.remove(); 
