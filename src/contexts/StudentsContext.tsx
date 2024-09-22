@@ -20,6 +20,7 @@ type StudentsContextData = {
     viceDirector: string,
     year: string
   ) => Promise<Blob>;
+  uploadCSV: (file: File) => Promise<void>;
 };
 
 type StudentsProviderProps = {
@@ -84,8 +85,30 @@ export const StudentsProvider = ({ children }: StudentsProviderProps) => {
     }
   };
 
+  const uploadCSV = async (file: File): Promise<void> => {
+    const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+    const contextUrl = `${baseUrl}/students`;
+    const token = localStorage.getItem('token');
+  
+    const formData = new FormData();
+    formData.append('file', file);
+  
+    try {
+      await axios.post(`${contextUrl}/register/`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    } catch (error) {
+      console.error('Failed to upload CSV', error);
+      throw new Error('Falha ao enviar arquivo CSV');
+    }
+  };
+  
+
   return (
-    <StudentsContext.Provider value={{ fetchStudents, generateCertificate }}>
+    <StudentsContext.Provider value={{ fetchStudents, generateCertificate, uploadCSV }}>
       {children}
     </StudentsContext.Provider>
   );
