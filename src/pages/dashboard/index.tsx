@@ -18,8 +18,7 @@ const DashboardPage = () => {
             {activeTab === 'students' ? 'Alunos' : 'Upload CSV de Estudantes'}
           </h2>
 
-          {/* Renderização condicional com base na aba ativa */}
-          {activeTab === 'students' ? <StudentsTable /> : <UploadCSV />}
+          {activeTab === 'students' ? <StudentsTable/> : <UploadCSV />}
         </div>
       </div>
     </>
