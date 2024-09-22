@@ -18,7 +18,7 @@ type StudentsContextData = {
     certificateType: string,
     director: string,
     viceDirector: string
-  ) => Promise<void>;
+  ) => Promise<Blob>;
 };
 
 type StudentsProviderProps = {
@@ -54,7 +54,7 @@ export const StudentsProvider = ({ children }: StudentsProviderProps) => {
     certificateType: string,
     director: string,
     viceDirector: string
-  ) => {
+  ): Promise<Blob> => {
     const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
     const contextUrl = `${baseUrl}/students`;
     const token = localStorage.getItem('token');
@@ -67,18 +67,17 @@ export const StudentsProvider = ({ children }: StudentsProviderProps) => {
     };
 
     try {
-      await axios.post(
-        `${contextUrl}${studentId}/certificate`,
-        { body },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      alert('Certificado gerado com sucesso!');
-    } catch (error) {
+      const response = await axios.post(`${contextUrl}/generate-pdf/`, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: 'blob', 
+      });
+
+      return response.data;
+      } catch (error) {
       console.error('Failed to generate certificate', error);
+      throw error;
     }
   };
 
