@@ -1,37 +1,23 @@
-# Etapa 1: Construir o aplicativo
-FROM node:18 AS builder
+# Usar uma imagem base do Node.js
+FROM node:20
 
-# Defina o diretório de trabalho
+# Definir o diretório de trabalho
 WORKDIR /app
 
-# Copie os arquivos de configuração do pacote
+# Copiar o package.json e o package-lock.json (ou yarn.lock)
 COPY package*.json ./
 
-# Instale as dependências
+# Instalar as dependências
 RUN npm install
 
-# Copie o restante do código do aplicativo
+# Copiar o restante do código
 COPY . .
 
-# Construa o aplicativo para produção
+# Construir o aplicativo Next.js
 RUN npm run build
 
-# Etapa 2: Servir o aplicativo
-FROM node:18 AS production
-
-# Defina o diretório de trabalho
-WORKDIR /app
-
-# Copie apenas as dependências de produção e o build
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/.next ./
-COPY --from=builder /app/public ./public
-
-# Instale apenas as dependências de produção
-RUN npm install --only=production
-
-# Exponha a porta que o Next.js irá usar
+# Expor a porta que o Next.js usará
 EXPOSE 3000
 
-# Comando para iniciar o Next.js
+# Comando para iniciar o aplicativo
 CMD ["npm", "start"]

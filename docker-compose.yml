@@ -1,6 +1,7 @@
 services:
   frontend:
     build:
+      context: .
       dockerfile: Dockerfile
     ports:
       - '3031:3000'
