@@ -1,6 +1,11 @@
+import { useStudents } from '@/contexts/StudentsContext';
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 const UploadCSV = () => {
+  const { uploadCSV } = useStudents();
+  const [file, setFile] = useState<File | null>(null);
+
   const handleDownloadTemplate = () => {
     const csvContent = 'Nome Completo,Trimestre\n';
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -11,27 +16,32 @@ const UploadCSV = () => {
     link.click();
   };
 
-  const [file, setFile] = useState<File | null>(null);
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       setFile(event.target.files[0]);
     }
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!file) {
-      alert('Por favor, selecione um arquivo CSV.');
+      toast.error('Por favor, selecione um arquivo CSV.'); // Toast de erro
       return;
     }
 
+    try {
+      await uploadCSV(file);
+      toast.success('Arquivo CSV enviado com sucesso!'); // Toast de sucesso
+      setFile(null);
+    } catch (error) {
+      toast.error('Erro ao enviar arquivo CSV, tente novamente.'); // Toast de erro
+    }
   };
 
   return (
     <div className='bg-white p-6 rounded shadow-md'>
       <p className='mb-4'>
-        Para inserir os alunos, faça upload de um arquivo CSV no formato correto.
-        O modelo de CSV pode ser baixado abaixo:
+        Para inserir os alunos, faça upload de um arquivo CSV no formato
+        correto. O modelo de CSV pode ser baixado abaixo:
       </p>
       <button
         onClick={handleDownloadTemplate}
