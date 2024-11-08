@@ -23,7 +23,8 @@ const StudentTable = () => {
   }>({});
   const { fetchStudents } = useStudents();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isBatchGeneration, setIsBatchGeneration] = useState(false); 
+  const [isBatchGeneration, setIsBatchGeneration] = useState(false);
+  const [chosenStudent, setChosenStudent] = useState<IStudentTable | null>(null);
 
   useEffect(() => {
     const getStudents = async () => {
@@ -53,7 +54,7 @@ const StudentTable = () => {
     student: IStudentTable,
     type: 'highlight_certificate' | 'diploma'
   ) => {
-    setSelectedStudents([student]); // Para geração individual
+    setChosenStudent(student); // Para geração individual
     setCertificateType(type);
     setIsModalOpen(true);
   };
@@ -61,6 +62,7 @@ const StudentTable = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedStudents([]);
+    setChosenStudent(null);
     setCertificateType('');
     setIsBatchGeneration(false); // Reseta o estado de geração em massa
   };
@@ -76,7 +78,9 @@ const StudentTable = () => {
     type: 'highlight_certificate' | 'diploma'
   ) => {
     // Limpa a lista de estudantes selecionados
-    const studentsToGenerate = students.filter((student) => selectedItems[student.id]);
+    const studentsToGenerate = students.filter(
+      (student) => selectedItems[student.id]
+    );
     setSelectedStudents(studentsToGenerate); // Armazena os alunos selecionados
     setCertificateType(type);
     setIsModalOpen(true);
@@ -137,18 +141,44 @@ const StudentTable = () => {
               <td className='py-2 px-4 border bg-white'>
                 <div className='flex justify-center items-center'>
                   {student.hasCertificate ? (
-                    <FaCheckCircle className='text-green-500' />
+                    <FaCheckCircle
+                      className='text-green-500 cursor-pointer'
+                      onClick={() =>
+                        handleGenerateCertificate(
+                          student,
+                          'highlight_certificate'
+                        )
+                      }
+                    />
                   ) : (
-                    <FaTimesCircle className='text-red-500' />
+                    <FaTimesCircle
+                      className='text-red-500 cursor-pointer'
+                      onClick={() =>
+                        handleGenerateCertificate(
+                          student,
+                          'highlight_certificate'
+                        )
+                      }
+                    />
                   )}
                 </div>
               </td>
               <td className='py-2 px-4 border bg-white'>
-                <div className='flex justify-center items-center'>
+                <div className='flex justify-center items-center cursor-pointer'>
                   {student.hasDiploma ? (
-                    <FaCheckCircle className='text-green-500' />
+                    <FaCheckCircle
+                      className='text-green-500 cursor-pointer'
+                      onClick={() =>
+                        handleGenerateCertificate(student, 'diploma')
+                      }
+                    />
                   ) : (
-                    <FaTimesCircle className='text-red-500' />
+                    <FaTimesCircle
+                      className='text-red-500'
+                      onClick={() =>
+                        handleGenerateCertificate(student, 'diploma')
+                      }
+                    />
                   )}
                 </div>
               </td>
@@ -163,7 +193,8 @@ const StudentTable = () => {
           onClose={closeModal}
           students={selectedStudents} // Passa a lista de estudantes selecionados
           certificateType={certificateType}
-          isBatch={isBatchGeneration} // Passa a informação se a geração é em massa
+          isBatch={isBatchGeneration}
+          student={chosenStudent} // Passa a informação se a geração é em massa
         />
       )}
     </>

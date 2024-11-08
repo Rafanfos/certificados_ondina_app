@@ -17,7 +17,7 @@ const validationSchema = Yup.object().shape({
 interface CertificateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  student?: IStudentTable; // Opcional, caso seja para um único aluno
+  student?: IStudentTable | null; // Opcional, caso seja para um único aluno
   students?: IStudentTable[]; // Opcional, caso seja para múltiplos alunos
   certificateType: string; // Tipo de certificado ou diploma
   isBatch?: boolean; // Nova prop para indicar se é em lote
@@ -50,17 +50,37 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
 
         // Lógica para gerar PDFs em lote
         for (const student of students) {
-          const pdfBlob = await generateCertificate(student.id, certificateType, director, viceDirector, year);
+          const pdfBlob = await generateCertificate(
+            student.id,
+            certificateType,
+            director,
+            viceDirector,
+            year
+          );
           zip.file(`${student.name}_${certificateType}.pdf`, pdfBlob);
         }
 
         const zipBlob = await zip.generateAsync({ type: 'blob' });
         FileSaver.saveAs(zipBlob, 'certificados.zip');
+
+        for (const student of students) {
+          handleUpdateCertificate(student);
+        }
+
         toast.success('Certificados gerados com sucesso!');
       } else if (student) {
         // Lógica para gerar um único PDF
-        const pdfBlob = await generateCertificate(student.id, certificateType, director, viceDirector, year);
+        const pdfBlob = await generateCertificate(
+          student.id,
+          certificateType,
+          director,
+          viceDirector,
+          year
+        );
         downloadPdf(pdfBlob);
+
+        handleUpdateCertificate(student);
+
         toast.success('Certificado gerado com sucesso!');
       }
       onClose();
@@ -74,10 +94,21 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
     const link = document.createElement('a');
     const generatedDate = new Date().toISOString();
     link.href = url;
-    link.setAttribute('download', `${student?.name}_${certificateType}_${generatedDate}.pdf`);
+    link.setAttribute(
+      'download',
+      `${student?.name}_${certificateType}_${generatedDate}.pdf`
+    );
     document.body.appendChild(link);
     link.click();
     link.remove();
+  };
+
+  const handleUpdateCertificate = (currentStudent: IStudentTable) => {
+    if (certificateType === 'highlight_certificate') {
+      currentStudent.hasCertificate = true;
+    } else if (certificateType === 'diploma') {
+      currentStudent.hasDiploma = true;
+    }
   };
 
   if (!isOpen) return null;
@@ -97,7 +128,9 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
             <label className='block text-gray-700'>Diretor:</label>
             <input
               type='text'
-              className={`w-full px-3 py-2 border rounded ${errors.director ? 'border-red-500' : ''}`}
+              className={`w-full px-3 py-2 border rounded ${
+                errors.director ? 'border-red-500' : ''
+              }`}
               {...register('director')}
             />
             {errors.director && (
@@ -109,11 +142,15 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
             <label className='block text-gray-700'>Vice-Diretor:</label>
             <input
               type='text'
-              className={`w-full px-3 py-2 border rounded ${errors.viceDirector ? 'border-red-500' : ''}`}
+              className={`w-full px-3 py-2 border rounded ${
+                errors.viceDirector ? 'border-red-500' : ''
+              }`}
               {...register('viceDirector')}
             />
             {errors.viceDirector && (
-              <p className='text-red-500 text-sm'>{errors.viceDirector.message}</p>
+              <p className='text-red-500 text-sm'>
+                {errors.viceDirector.message}
+              </p>
             )}
           </div>
 
@@ -121,7 +158,9 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
             <label className='block text-gray-700'>Ano:</label>
             <input
               type='text'
-              className={`w-full px-3 py-2 border rounded ${errors.year ? 'border-red-500' : ''}`}
+              className={`w-full px-3 py-2 border rounded ${
+                errors.year ? 'border-red-500' : ''
+              }`}
               {...register('year')}
             />
             {errors.year && (
