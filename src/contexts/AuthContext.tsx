@@ -17,7 +17,7 @@ interface IUserData {
 }
 
 type AuthContextData = {
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<string>;
   fetchUserData: () => Promise<IUserData>;
 };
 
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const router = useRouter();
 
-  const login = async (username: string, password: string) => {
+  const login = async (username: string, password: string): Promise<string> => {
     const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
     const contextUrl = `${baseUrl}/users`;
 
@@ -44,9 +44,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const userData = response.data;
 
       const token = userData.access;
-      localStorage.setItem('token', token);
 
-      router.push('/dashboard');
+      return token;
     } catch (error) {
       console.error(error);
       throw new Error('Falha ao fazer login');
