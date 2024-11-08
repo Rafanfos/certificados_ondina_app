@@ -4,6 +4,8 @@ import * as Yup from 'yup';
 import { useStudents } from '@/contexts/StudentsContext';
 import { toast } from 'react-toastify';
 import { IStudentTable } from '../studentsTable';
+import JSZip from 'jszip';
+import FileSaver from 'file-saver';
 
 // Definindo o schema de validação com Yup
 const validationSchema = Yup.object().shape({
@@ -15,15 +17,19 @@ const validationSchema = Yup.object().shape({
 interface CertificateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  student: IStudentTable;
-  certificateType: string;
+  student?: IStudentTable | null; // Opcional, caso seja para um único aluno
+  students?: IStudentTable[]; // Opcional, caso seja para múltiplos alunos
+  certificateType: string; // Tipo de certificado ou diploma
+  isBatch?: boolean; // Nova prop para indicar se é em lote
 }
 
 const CertificateModal: React.FC<CertificateModalProps> = ({
   isOpen,
   onClose,
   student,
+  students,
   certificateType,
+  isBatch = false, // Default para false
 }) => {
   const { generateCertificate } = useStudents();
 
@@ -36,27 +42,73 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
   });
 
   const onSubmit = async (data: any) => {
-    const { director, viceDirector, year } = data; 
-  
+    const { director, viceDirector, year } = data;
+
     try {
-      const pdfBlob = await generateCertificate(student.id, certificateType, director, viceDirector, year);
-      downloadPdf(pdfBlob); 
-      toast.success('Certificado gerado com sucesso!'); 
+      if (isBatch && students) {
+        const zip = new JSZip();
+
+        // Lógica para gerar PDFs em lote
+        for (const student of students) {
+          const pdfBlob = await generateCertificate(
+            student.id,
+            certificateType,
+            director,
+            viceDirector,
+            year
+          );
+          zip.file(`${student.name}_${certificateType}.pdf`, pdfBlob);
+        }
+
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        FileSaver.saveAs(zipBlob, 'certificados.zip');
+
+        for (const student of students) {
+          handleUpdateCertificate(student);
+        }
+
+        toast.success('Certificados gerados com sucesso!');
+      } else if (student) {
+        // Lógica para gerar um único PDF
+        const pdfBlob = await generateCertificate(
+          student.id,
+          certificateType,
+          director,
+          viceDirector,
+          year
+        );
+        downloadPdf(pdfBlob);
+
+        handleUpdateCertificate(student);
+
+        toast.success('Certificado gerado com sucesso!');
+      }
       onClose();
     } catch (error) {
-      toast.error('Erro ao gerar ou baixar certificado, tente novamente.'); 
+      toast.error('Erro ao gerar ou baixar certificados, tente novamente.');
     }
   };
-  
+
   const downloadPdf = (response: Blob) => {
     const url = window.URL.createObjectURL(response);
     const link = document.createElement('a');
     const generatedDate = new Date().toISOString();
     link.href = url;
-    link.setAttribute('download', `${student.name}_${certificateType}_${generatedDate}pdf`); 
+    link.setAttribute(
+      'download',
+      `${student?.name}_${certificateType}_${generatedDate}.pdf`
+    );
     document.body.appendChild(link);
-    link.click(); 
-    link.remove(); 
+    link.click();
+    link.remove();
+  };
+
+  const handleUpdateCertificate = (currentStudent: IStudentTable) => {
+    if (certificateType === 'highlight_certificate') {
+      currentStudent.hasCertificate = true;
+    } else if (certificateType === 'diploma') {
+      currentStudent.hasDiploma = true;
+    }
   };
 
   if (!isOpen) return null;
@@ -67,8 +119,8 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
         <h2 className='text-xl mb-4'>
           Gerar{' '}
           {certificateType === 'highlight_certificate'
-            ? 'Certificado de Destaque'
-            : 'Diploma'}
+            ? 'Certificados de Destaque'
+            : 'Diplomas'}
         </h2>
 
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -121,7 +173,7 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
               type='submit'
               className='bg-blue-500 text-white px-4 py-2 rounded mr-2'
             >
-              Gerar Certificado
+              Gerar {isBatch ? 'Certificados' : 'Certificado'}
             </button>
             <button
               type='button'
