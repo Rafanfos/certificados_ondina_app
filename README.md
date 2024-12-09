@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Certificados Ondina App  
 
-## Getting Started
+## Introdução  
 
-First, run the development server:
+Este projeto é uma aplicação web desenvolvida com [Next.js](https://nextjs.org/) para facilitar o trabalho da diretoria de uma instituição de ensino na geração e gestão de certificados e diplomas.  
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Principais funcionalidades  
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Inserção de alunos na plataforma**: A diretoria pode adicionar os dados dos estudantes.  
+- **Geração de documentos**: Certificados e diplomas são criados automaticamente a partir das informações fornecidas.  
+- **Histórico de documentos gerados**: Permite gerenciar os alunos e consultar quando os certificados e diplomas foram emitidos.  
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+A aplicação utiliza uma API como backend, cuja URL deve ser configurada como variável de ambiente.  
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Como rodar o projeto  
 
-To learn more about Next.js, take a look at the following resources:
+### Pré-requisitos  
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Certifique-se de ter instalado:  
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Node.js** (versão 16 ou superior).  
+2. **npm** (incluído com o Node.js).  
 
-## Deploy on Vercel
+### Passo a passo  
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. **Clone o repositório do projeto**  
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   ```bash
+   git clone https://github.com/Rafanfos/certificados_ondina_app.git
+   cd certificados_ondina_app
+
+2. **Instale as dependências**
+
+   ```bash
+   npm install
+
+3. **Configure as variáveis de ambiente**
+
+   - Crie um arquivo .env na raiz do projeto com base no modelo do arquivo .env.local.
+   - Insira a variável de ambiente NEXT_PUBLIC_BACKEND_URL, indicando o endereço do backend. Exemplo:
+
+     ```bash
+     NEXT_PUBLIC_BACKEND_URL=http://localhost:3030
+
+4. **Inicie o servidor de desenvolvimento**
+
+   Após configurar as variáveis de ambiente, inicie a aplicação com o comando:
+
+   ```bash
+   npm run dev
+
+5. **Acesse a aplicação**
+
+   O servidor será iniciado em <http://localhost:3000>. Abra esse endereço no navegador para acessar o painel.
