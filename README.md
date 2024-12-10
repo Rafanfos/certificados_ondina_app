@@ -16,17 +16,17 @@ A aplicação utiliza uma API como backend, cuja URL deve ser configurada como v
 
 ## Sumário  
 
-1. [Instalação] (#instalação)  
+1. Instalação 
    - Guia para configurar e executar o projeto localmente.  
 
 2. Páginas
    - A aplicação é dividida em duas páginas principais:  
-     - [Login] (#login): Autenticação para acessar o painel administrativo.  
-     - [Dashboard] (#dashboard): Painel administrativo para gerenciar alunos e documentos.
+     - Login: Autenticação para acessar o painel administrativo.  
+     - Dashboard: Painel administrativo para gerenciar alunos e documentos.
 
 --  
 
-## Como rodar o projeto {#instalação}
+## Como rodar o projeto 
 
 ### Pré-requisitos  
 
@@ -67,7 +67,7 @@ Certifique-se de ter instalado:
 
    O servidor será iniciado em <http://localhost:3000>. Abra esse endereço no navegador para acessar o painel.
 
-## Login {#login}
+## Login 
 
 A página de login é usada para autenticar a diretoria no sistema.
 
@@ -77,7 +77,7 @@ A página de login é usada para autenticar a diretoria no sistema.
 
 Após a criação da conta no backend, utilize as credenciais fornecidas para fazer login nesta página e acessar o dashboard.
 
-## Dashboard {#dashboard}  
+## Dashboard 
 
 O **Dashboard** é o painel administrativo da aplicação, onde a diretoria pode gerenciar os alunos e os documentos emitidos. Ele está dividido em três principais seções:  
 
