@@ -16,13 +16,13 @@ A aplicação utiliza uma API como backend, cuja URL deve ser configurada como v
 
 ## Sumário  
 
-1. Instalação 
+1. **Instalação** 
    - Guia para configurar e executar o projeto localmente.  
 
-2. Páginas
+2. **Páginas**
    - A aplicação é dividida em duas páginas principais:  
-     - Login: Autenticação para acessar o painel administrativo.  
-     - Dashboard: Painel administrativo para gerenciar alunos e documentos.
+     - **Login**: Autenticação para acessar o painel administrativo.  
+     - **Dashboard**: Painel administrativo para gerenciar alunos e documentos.
 
 --  
 
