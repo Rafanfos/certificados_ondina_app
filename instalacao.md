@@ -1,19 +1,5 @@
 # Certificados Ondina App  
 
-## Introdução  
-
-Este projeto é uma aplicação web desenvolvida com [Next.js](https://nextjs.org/) para facilitar o trabalho da diretoria de uma instituição de ensino na geração e gestão de certificados e diplomas.  
-
-### Principais funcionalidades  
-
-- **Inserção de alunos na plataforma**: A diretoria pode adicionar os dados dos estudantes.  
-- **Geração de documentos**: Certificados e diplomas são criados automaticamente a partir das informações fornecidas.  
-- **Histórico de documentos gerados**: Permite gerenciar os alunos e consultar quando os certificados e diplomas foram emitidos.  
-
-A aplicação utiliza uma API como backend, cuja URL deve ser configurada como variável de ambiente.  
-
----
-
 ## Como rodar o projeto  
 
 ### Pré-requisitos  
@@ -54,3 +40,6 @@ Certifique-se de ter instalado:
 5. **Acesse a aplicação**
 
    O servidor será iniciado em <http://localhost:3000>. Abra esse endereço no navegador para acessar o painel.
+
+
+Confira aqui a próxima seção sobre a página de [Login](/login.md)
