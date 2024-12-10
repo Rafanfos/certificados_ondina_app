@@ -10,7 +10,12 @@ import FileSaver from 'file-saver';
 // Definindo o schema de validação com Yup
 const validationSchema = Yup.object().shape({
   director: Yup.string().required('Diretor é obrigatório'),
-  viceDirector: Yup.string().required('Vice-Diretor é obrigatório'),
+  viceDirector: Yup.string()
+    .when('certificateType', {
+      is: (type: string) => type === 'highlight_certificate',
+      then: (schema) => schema.required('Vice-Diretor é obrigatório'),
+      otherwise: (schema) => schema.optional(),
+    }),
   year: Yup.string().required('Ano é obrigatório'),
 });
 
@@ -43,7 +48,7 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
 
   const onSubmit = async (data: any) => {
     const { director, viceDirector, year } = data;
-
+    console.log(data)
     try {
       if (isBatch && students) {
         const zip = new JSZip();
@@ -137,23 +142,23 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
               <p className='text-red-500 text-sm'>{errors.director.message}</p>
             )}
           </div>
-
-          <div className='mb-4'>
-            <label className='block text-gray-700'>Vice-Diretor:</label>
-            <input
-              type='text'
-              className={`w-full px-3 py-2 border rounded ${
-                errors.viceDirector ? 'border-red-500' : ''
-              }`}
-              {...register('viceDirector')}
-            />
-            {errors.viceDirector && (
-              <p className='text-red-500 text-sm'>
-                {errors.viceDirector.message}
-              </p>
-            )}
-          </div>
-
+          {certificateType === 'highlight_certificate' && (
+            <div className='mb-4'>
+              <label className='block text-gray-700'>Vice-Diretor:</label>
+              <input
+                type='text'
+                className={`w-full px-3 py-2 border rounded ${
+                  errors.viceDirector ? 'border-red-500' : ''
+                }`}
+                {...register('viceDirector')}
+              />
+              {errors.viceDirector && (
+                <p className='text-red-500 text-sm'>
+                  {errors.viceDirector.message}
+                </p>
+              )}
+            </div>
+          )}
           <div className='mb-4'>
             <label className='block text-gray-700'>Ano:</label>
             <input
