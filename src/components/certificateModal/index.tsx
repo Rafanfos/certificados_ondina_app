@@ -1,31 +1,32 @@
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as Yup from 'yup';
-import { useStudents } from '@/contexts/StudentsContext';
-import { toast } from 'react-toastify';
-import { IStudentTable } from '../studentsTable';
-import JSZip from 'jszip';
-import FileSaver from 'file-saver';
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
+import { useStudents } from "@/contexts/StudentsContext";
+import { toast } from "react-toastify";
+import { IStudentTable } from "../studentsTable";
+import JSZip from "jszip";
+import FileSaver from "file-saver";
+import { useState } from "react";
+import { FaSpinner } from "react-icons/fa";
 
-// Definindo o schema de validação com Yup
 const validationSchema = Yup.object().shape({
-  director: Yup.string().required('Diretor é obrigatório'),
-  viceDirector: Yup.string()
-    .when('certificateType', {
-      is: (type: string) => type === 'highlight_certificate',
-      then: (schema) => schema.required('Vice-Diretor é obrigatório'),
-      otherwise: (schema) => schema.optional(),
-    }),
-  year: Yup.string().required('Ano é obrigatório'),
+  director: Yup.string().required("Diretor é obrigatório"),
+  viceDirector: Yup.string().when("certificateType", {
+    is: (type: string) => type === "highlight_certificate",
+    then: (schema: { required: (arg0: string) => any }) =>
+      schema.required("Vice-Diretor é obrigatório"),
+    otherwise: (schema: { optional: () => any }) => schema.optional(),
+  }),
+  year: Yup.string().required("Ano é obrigatório"),
 });
 
 interface CertificateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  student?: IStudentTable | null; // Opcional, caso seja para um único aluno
-  students?: IStudentTable[]; // Opcional, caso seja para múltiplos alunos
-  certificateType: string; // Tipo de certificado ou diploma
-  isBatch?: boolean; // Nova prop para indicar se é em lote
+  student?: IStudentTable | null;
+  students?: IStudentTable[];
+  certificateType: string;
+  isBatch?: boolean;
 }
 
 const CertificateModal: React.FC<CertificateModalProps> = ({
@@ -37,6 +38,7 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
   isBatch = false, // Default para false
 }) => {
   const { generateCertificate } = useStudents();
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
@@ -48,12 +50,13 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
 
   const onSubmit = async (data: any) => {
     const { director, viceDirector, year } = data;
-    console.log(data)
+
+    setIsLoading(true);
+
     try {
       if (isBatch && students) {
         const zip = new JSZip();
 
-        // Lógica para gerar PDFs em lote
         for (const student of students) {
           const pdfBlob = await generateCertificate(
             student.id,
@@ -65,16 +68,15 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
           zip.file(`${student.name}_${certificateType}.pdf`, pdfBlob);
         }
 
-        const zipBlob = await zip.generateAsync({ type: 'blob' });
-        FileSaver.saveAs(zipBlob, 'certificados.zip');
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        FileSaver.saveAs(zipBlob, "certificados.zip");
 
         for (const student of students) {
           handleUpdateCertificate(student);
         }
 
-        toast.success('Certificados gerados com sucesso!');
+        toast.success("Certificados gerados com sucesso!");
       } else if (student) {
-        // Lógica para gerar um único PDF
         const pdfBlob = await generateCertificate(
           student.id,
           certificateType,
@@ -86,21 +88,24 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
 
         handleUpdateCertificate(student);
 
-        toast.success('Certificado gerado com sucesso!');
+        toast.success("Certificado gerado com sucesso!");
       }
+
+      setIsLoading(false);
       onClose();
     } catch (error) {
-      toast.error('Erro ao gerar ou baixar certificados, tente novamente.');
+      setIsLoading(false);
+      toast.error("Erro ao gerar ou baixar certificados, tente novamente.");
     }
   };
 
   const downloadPdf = (response: Blob) => {
     const url = window.URL.createObjectURL(response);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     const generatedDate = new Date().toISOString();
     link.href = url;
     link.setAttribute(
-      'download',
+      "download",
       `${student?.name}_${certificateType}_${generatedDate}.pdf`
     );
     document.body.appendChild(link);
@@ -109,9 +114,9 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
   };
 
   const handleUpdateCertificate = (currentStudent: IStudentTable) => {
-    if (certificateType === 'highlight_certificate') {
+    if (certificateType === "highlight_certificate") {
       currentStudent.hasCertificate = true;
-    } else if (certificateType === 'diploma') {
+    } else if (certificateType === "diploma") {
       currentStudent.hasDiploma = true;
     }
   };
@@ -119,76 +124,101 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'>
-      <div className='bg-white p-6 rounded shadow-lg'>
-        <h2 className='text-xl mb-4'>
-          Gerar{' '}
-          {certificateType === 'highlight_certificate'
-            ? 'Certificados de Destaque'
-            : 'Diplomas'}
-        </h2>
-
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className='mb-4'>
-            <label className='block text-gray-700'>Diretor:</label>
-            <input
-              type='text'
-              className={`w-full px-3 py-2 border rounded ${
-                errors.director ? 'border-red-500' : ''
-              }`}
-              {...register('director')}
-            />
-            {errors.director && (
-              <p className='text-red-500 text-sm'>{errors.director.message}</p>
-            )}
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div className="bg-white p-6 rounded shadow-lg">
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-10 px-6">
+            <FaSpinner className="animate-spin text-blue-500 text-4xl mb-4" />
+            <p className="text-lg text-gray-700">
+              Gerando certificado, aguarde...
+            </p>
           </div>
-          {certificateType === 'highlight_certificate' && (
-            <div className='mb-4'>
-              <label className='block text-gray-700'>Vice-Diretor:</label>
-              <input
-                type='text'
-                className={`w-full px-3 py-2 border rounded ${
-                  errors.viceDirector ? 'border-red-500' : ''
-                }`}
-                {...register('viceDirector')}
-              />
-              {errors.viceDirector && (
-                <p className='text-red-500 text-sm'>
-                  {errors.viceDirector.message}
-                </p>
+        ) : (
+          <>
+            <h2 className="text-xl mb-4">
+              Gerar{" "}
+              {certificateType === "highlight_certificate"
+                ? "Certificados de Destaque"
+                : "Diplomas"}
+            </h2>
+
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="mb-4">
+                <label className="block text-gray-700">Diretor:</label>
+                <input
+                  type="text"
+                  className={`w-full px-3 py-2 border rounded ${
+                    errors.director ? "border-red-500" : ""
+                  }`}
+                  {...register("director")}
+                  disabled={isLoading}
+                />
+                {errors.director && (
+                  <p className="text-red-500 text-sm">
+                    {errors.director.message}
+                  </p>
+                )}
+              </div>
+              {certificateType === "highlight_certificate" && (
+                <div className="mb-4">
+                  <label className="block text-gray-700">Vice-Diretor:</label>
+                  <input
+                    type="text"
+                    className={`w-full px-3 py-2 border rounded ${
+                      errors.viceDirector ? "border-red-500" : ""
+                    }`}
+                    {...register("viceDirector")}
+                    disabled={isLoading}
+                  />
+                  {errors.viceDirector && (
+                    <p className="text-red-500 text-sm">
+                      {errors.viceDirector.message}
+                    </p>
+                  )}
+                </div>
               )}
-            </div>
-          )}
-          <div className='mb-4'>
-            <label className='block text-gray-700'>Ano:</label>
-            <input
-              type='text'
-              className={`w-full px-3 py-2 border rounded ${
-                errors.year ? 'border-red-500' : ''
-              }`}
-              {...register('year')}
-            />
-            {errors.year && (
-              <p className='text-red-500 text-sm'>{errors.year.message}</p>
-            )}
-          </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">Ano:</label>
+                <input
+                  type="text"
+                  className={`w-full px-3 py-2 border rounded ${
+                    errors.year ? "border-red-500" : ""
+                  }`}
+                  {...register("year")}
+                  disabled={isLoading}
+                />
+                {errors.year && (
+                  <p className="text-red-500 text-sm">{errors.year.message}</p>
+                )}
+              </div>
 
-          <div className='flex justify-end'>
-            <button
-              type='submit'
-              className='bg-blue-500 text-white px-4 py-2 rounded mr-2'
-            >
-              Gerar {isBatch ? 'Certificados' : 'Certificado'}
-            </button>
-            <button
-              type='button'
-              className='bg-gray-500 text-white px-4 py-2 rounded'
-              onClick={onClose}
-            >
-              Cancelar
-            </button>
-          </div>
-        </form>
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded mr-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <span className="flex items-center">
+                      <FaSpinner className="animate-spin mr-2" />
+                      Processando...
+                    </span>
+                  ) : (
+                    `Gerar ${isBatch ? "Certificados" : "Certificado"}`
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={onClose}
+                  disabled={isLoading}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );
